@@ -7,10 +7,10 @@
 <ul class="collection">
 	% for my $device (sort keys %{$devices}) {
 		<li class="collection-item device">
+			<%= $device %>
 			%= form_for '/' => (method => 'post') => begin
 				%= hidden_field device => $device
 				%= hidden_field action => 'toggle'
-				<%= $device %>
 				<button class="btn-flat waves-effect waves-green" type="submit">
 					Toggle
 				</button>
