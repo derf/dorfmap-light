@@ -132,8 +132,8 @@ post '/' => sub {
 
 app->config(
 	hypnotoad => {
-		listen => [ $ENV{LISTEN} // 'http://*:8098' ],
-		pid_file => '/tmp/minipart.pid',
+		listen => [ $ENV{LISTEN} // 'http://*:8099' ],
+		pid_file => '/tmp/dorfmap-light.pid',
 		workers  => $ENV{WORKERS} // 1,
 	},
 );
