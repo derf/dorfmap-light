@@ -6,7 +6,8 @@
 
 <ul class="collection">
 	% for my $device (sort keys %{$devices}) {
-		<li class="collection-item device">
+		% my $eclass = $devices->{$device}{value} ? 'active' : q{};
+		<li class="collection-item device <%= $eclass %>">
 			<%= $device %>
 			%= form_for '/' => (method => 'post') => begin
 				%= hidden_field device => $device

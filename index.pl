@@ -35,7 +35,7 @@ sub set_device {
 sub get_device {
 	my ($device) = @_;
 
-	my $state = slurp( $devices{$device}{path} ) ? 1 : 0;
+	my $state = slurp( $devices{$device}{path} ) // 0;
 
 	return $state;
 }
@@ -63,7 +63,7 @@ sub load_devices {
 			pwm  => 0,
 		};
 
-		if ($controlpath =~ m{ / pwm \d+ $ }x) {
+		if ( $controlpath =~ m{ / pwm \d+ $ }x ) {
 			$devices{$id}{pwm} = 1;
 		}
 
@@ -78,10 +78,18 @@ sub load_devices {
 	}
 }
 
+sub load_status {
+	for my $device ( keys %devices ) {
+		$devices{$device}{value} = get_device($device);
+	}
+}
+
 load_devices();
 
 get '/' => sub {
 	my ($self) = @_;
+
+	load_status();
 
 	$self->render(
 		'index',
@@ -93,36 +101,38 @@ post '/' => sub {
 	my ($self) = @_;
 
 	my $params = $self->req->json;
-	if (not exists $params->{action}) {
+	if ( not exists $params->{action} ) {
 		$params = $self->req->params->to_hash;
 	}
 
-	my ($action, $device) = @{$params}{qw{action device}};
+	my ( $action, $device ) = @{$params}{qw{action device}};
 
-	if ($action eq 'on') {
-		if ($devices{$device}{pwm}) {
-			set_device($device, 255);
+	if ( $action eq 'on' ) {
+		if ( $devices{$device}{pwm} ) {
+			set_device( $device, 255 );
 		}
 		else {
-			set_device($device, 1);
+			set_device( $device, 1 );
 		}
 	}
-	elsif ($action eq 'off') {
-		set_device($device, 0);
+	elsif ( $action eq 'off' ) {
+		set_device( $device, 0 );
 	}
-	elsif ($action eq 'toggle') {
-		if (get_device($device) == 0) {
-			if ($devices{$device}{pwm}) {
-				set_device($device, 255);
+	elsif ( $action eq 'toggle' ) {
+		if ( get_device($device) == 0 ) {
+			if ( $devices{$device}{pwm} ) {
+				set_device( $device, 255 );
 			}
 			else {
-				set_device($device, 1);
+				set_device( $device, 1 );
 			}
 		}
 		else {
-			set_device($device, 0);
+			set_device( $device, 0 );
 		}
 	}
+
+	load_status();
 
 	$self->render(
 		'index',
