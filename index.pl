@@ -84,7 +84,47 @@ sub load_status {
 	}
 }
 
-load_devices();
+post '/api/action' => sub {
+	my ($self) = @_;
+	my $params = $self->req->json;
+
+	if ( not exists $params->{action} ) {
+		$params = $self->req->params->to_hash;
+	}
+
+	my ( $action, $device ) = @{$params}{qw{action device}};
+
+	if ( $action eq 'toggle' ) {
+		my $state = get_device($device);
+		if ( $state > 0 ) {
+			set_device( $device, 0 );
+		}
+		elsif ( $devices{$device}{pwm} ) {
+			set_device( $device, 255 );
+		}
+		else {
+			set_device( $device, 1 );
+		}
+		load_status();
+	}
+	$self->render(
+		json => {
+			devices => \%devices,
+		}
+	);
+};
+
+get '/api/devices' => sub {
+	my ($self) = @_;
+
+	load_status();
+
+	$self->render(
+		json => {
+			devices => \%devices,
+		}
+	);
+};
 
 get '/' => sub {
 	my ($self) = @_;
@@ -149,5 +189,7 @@ app->config(
 );
 
 app->defaults( layout => 'default' );
+
+load_devices();
 
 app->start;

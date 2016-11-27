@@ -7,8 +7,9 @@
 <ul class="collection">
 	% for my $device (sort keys %{$devices}) {
 		% my $eclass = $devices->{$device}{value} ? 'active' : q{};
-		<li class="collection-item device <%= $eclass %>">
+		<li class="collection-item device <%= $eclass %>" data-device="<%= $device %>">
 			<%= $device %>
+			<!--
 			%= form_for '/' => (method => 'post') => begin
 				%= hidden_field device => $device
 				%= hidden_field action => 'toggle'
@@ -16,6 +17,7 @@
 					Toggle
 				</button>
 			% end
+			-->
 		</li>
 	% }
 </ul>
